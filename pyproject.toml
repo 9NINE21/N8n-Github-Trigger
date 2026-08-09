@@ -1,0 +1,17 @@
+[project]
+name = "n8n-github-trigger"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "hrishav.rupakheti", email = "hrishav.rupakheti@urekasystems.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+n8n-github-trigger = "n8n_github_trigger:main"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
