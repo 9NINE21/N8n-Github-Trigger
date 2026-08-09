@@ -1,7 +1,7 @@
 import random
 class DataGen:
     def __init__(self):
-        self.users = ["Alice", "Bob", "Charlie"]
+        self.users = ["Alice", "Bob"]
     def generate(self):
         return random.choice(self.users)
 
