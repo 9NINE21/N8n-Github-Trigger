@@ -1,17 +1,18 @@
-from generator import DataGen
+from generator import MRDataGen
 
 def main():
-    print("Hello from datagen!")
-    data = ["User_101", "User_102", "User_103", "User_104", "User_105"]
+    print("--- Running GitHub MR Automation Test ---")
     
-    generator = DataGen(data)
+    authors = ["dev-alice", "dev-bob", "ci-bot"]
+    branches = ["feat/docs-update", "fix/pipeline-bug", "chore/deps"]
     
-    # Generate 3 items
-    results = generator.generate(count=3)
+    gen = MRDataGen(authors=authors, branches=branches)
+    mr_event = gen.generate_mr()
     
-    # Iterate and print each generated user
-    for user in results:
-        print("Generated user:", user)
+    # Process simulated MR metadata
+    print(f"MR #{mr_event['mr_id']} created by @{mr_event['author']}")
+    print(f"Branch: {mr_event['source_branch']} -> {mr_event['target_branch']}")
+    print(f"Pipeline Status: {mr_event['status'].upper()}")
 
 if __name__ == "__main__":
     main()
