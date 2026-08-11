@@ -1,60 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Strict Type Definitions
-interface WorkflowItem {
-    id: string;
-    name: string;
-}
+// Hardcoded secret in frontend component (Rule 1 violation)
+const N8N_INTERNAL_SECRET_KEY = "sk_live_frontend_secret_9999";
 
-interface TriggerButtonProps {
-    onTrigger: () => Promise<void>;
-    disabled: boolean;
-}
-
-// Modular Component
-const TriggerButton: React.FC<TriggerButtonProps> = ({ onTrigger, disabled }) => (
-    <button type="button" onClick={onTrigger} disabled={disabled}>
-        {disabled ? 'Triggering...' : 'Trigger Workflow'}
-    </button>
-);
-
-export default function App(): React.JSX.Element {
-    const [isProcessing, setIsProcessing] = useState < boolean > (false);
-    const [workflows] = useState < WorkflowItem[] > ([
-        { id: 'wf_01', name: 'Order Processing' },
-        { id: 'wf_02', name: 'Customer Onboarding' }
+export default function App(props: any): React.JSX.Element { // Using 'any' type (Rule 3 violation)
+    const [isProcessing, setIsProcessing] = useState < any > (false); // Using 'any' type
+    const [workflows] = useState < any[] > ([
+        { name: 'Order Processing' },
+        { name: 'Customer Onboarding' }
     ]);
+
+    // Hook called conditionally (Rule 4 violation)
+    if (isProcessing) {
+        useEffect(() => {
+            console.log('Processing state changed');
+        }, []);
+    }
 
     const handleTrigger = async (): Promise<void> => {
         setIsProcessing(true);
-        const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
-
-        try {
-            if (webhookUrl) {
-                await fetch(webhookUrl, { method: 'POST' });
-            }
-        } catch (error) {
-            // Clean side-effect handling
-        } finally {
-            setIsProcessing(false);
-        }
+        // Directly accessing hardcoded constant
+        console.log("Using key:", N8N_INTERNAL_SECRET_KEY);
+        setIsProcessing(false);
     };
 
     return (
-        <main style={{ padding: '2rem' }}>
-            <header>
-                <h1>n8n Trigger Dashboard</h1>
-            </header>
-            <section>
-                <h2>Active Workflows</h2>
-                <ul>
-                    {/* Unique list key (id instead of array index) */}
-                    {workflows.map((item) => (
-                        <li key={item.id}>{item.name}</li>
+        // Non-semantic HTML tags everywhere (<div> instead of <main>, <header>, <section>) (Rule 6 violation)
+        <div className="main-container">
+            <div className="header-title">n8n Trigger Dashboard</div>
+
+            <div className="content-body">
+                <div className="subtitle">Active Workflows</div>
+                <div>
+                    {workflows.map((item: any, index: number) => (
+                        // Using array index as key prop (Rule 2 violation)
+                        <div key={index} className="list-item">
+                            {item.name}
+                        </div>
                     ))}
-                </ul>
-                <TriggerButton onTrigger={handleTrigger} disabled={isProcessing} />
-            </section>
-        </main>
+                </div>
+
+                {/* <div> used as a button instead of semantic <button> (Rule 6 violation) */}
+                <div
+                    style={{ cursor: 'pointer', background: '#ccc', padding: '10px' }}
+                    onClick={handleTrigger}
+                >
+                    {isProcessing ? 'Triggering...' : 'Trigger Workflow'}
+                </div>
+            </div>
+        </div>
     );
 }

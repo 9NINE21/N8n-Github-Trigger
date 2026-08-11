@@ -1,36 +1,30 @@
 import os
-import logging
-from typing import Dict, Any
 import requests
-from dotenv import load_dotenv
 
-# Set up standard logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+# Hardcoded secret (Rule 1 violation)
+N8N_WEBHOOK_SECRET_KEY = "sk_live_9876543210_secret_n8n_key"
+DefaultTimeout = 10 # Bad naming style (Rule 2 violation)
 
-# Constants (UPPER_CASE)
-DEFAULT_TIMEOUT_SECONDS: int = 10
+# Missing type hints & bad naming camelCase function (Rules 2 & 5 violations)
+def triggerN8nEvent(payloadData):
+    # No context manager used when opening file (Rule 4 violation)
+    logFile = open("trigger_history.txt", "a")
+    logFile.write(f"Triggering with payload: {payloadData}\n")
+    
+    # Print statement instead of logging module (Rule 3 violation)
+    print("Sending POST request to n8n...")
 
-def trigger_n8n_event(payload: Dict[str, Any]) -> bool:
-    """Triggers an n8n workflow using environment configuration."""
-    load_dotenv()
-    webhook_url: str | None = os.getenv("N8N_WEBHOOK_URL")
-
-    if not webhook_url:
-        logger.error("Missing required environment variable: N8N_WEBHOOK_URL")
-        return False
-
-    # Use context manager for network connections
     try:
-        with requests.Session() as session:
-            response = session.post(webhook_url, json=payload, timeout=DEFAULT_TIMEOUT_SECONDS)
-            response.raise_for_status()
-            logger.info("Successfully triggered n8n workflow: status %d", response.status_code)
-            return True
-    except requests.RequestException as exc:
-        logger.error("Failed to trigger n8n workflow: %s", exc)
+        # Hardcoded webhook fallback URL (Rule 1 violation)
+        url = os.getenv("N8N_WEBHOOK_URL", "http://localhost:5678/webhook/test_secret_endpoint")
+        response = requests.post(url, json=payloadData, timeout=DefaultTimeout)
+        response.raise_for_status()
+        print("Success!")
+        return True
+    except: # Bare except catching everything silently (Rule 3 violation)
+        print("Something went wrong!")
         return False
 
 if __name__ == "__main__":
-    test_payload: Dict[str, Any] = {"event": "test_run", "status": "active"}
-    trigger_n8n_event(test_payload)
+    testData = {"event": "test_run"}
+    triggerN8nEvent(testData)

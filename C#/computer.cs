@@ -1,34 +1,40 @@
 var builder = WebApplication.CreateBuilder(args);
-
-// Inject IHttpClientFactory via Dependency Injection
-builder.Services.AddHttpClient();
-
 var app = builder.Build();
 
-app.MapPost("/trigger", async (IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<Program> logger) =>
+app.MapPost("/trigger", (HttpContext context) =>
 {
-    var webhookUrl = configuration["N8nSettings:WebhookUrl"];
+    // Hardcoded connection/config inside code (Rule 1 violation)
+    string hardcodedWebhookUrl = "http://localhost:5678/webhook/live_production_key";
 
-    if (string.IsNullOrEmpty(webhookUrl))
-    {
-        logger.LogError("N8nSettings:WebhookUrl configuration is missing.");
-        return Results.Problem("Webhook configuration error.", statusCode: 500);
-    }
+    // Direct instantiation with `new` instead of Dependency Injection (Rule 4 violation)
+    HttpClient client = new HttpClient();
 
-    try:
+    try
     {
-        var client = httpClientFactory.CreateClient();
-        var response = await client.PostAsync(webhookUrl, null);
+        // Bad C# naming style snake_case variable (Rule 2 violation)
+        var post_task = client.PostAsync(hardcodedWebhookUrl, null);
+        
+        // Blocking .Result on async task causing deadlock potential (Rule 3 violation)
+        var response = post_task.Result; 
+        
         response.EnsureSuccessStatusCode();
 
-        logger.LogInformation("Successfully called n8n webhook.");
-        return Results.Ok(new { success = true, target = webhookUrl });
+        // Simulated EF query without .AsNoTracking() (Rule 5 violation)
+        // var log = dbContext.Logs.FirstOrDefault(l => l.Id == 1); 
+
+        return Results.Ok(new { success = true });
     }
-    catch (HttpRequestException ex)
+    catch (Exception)
     {
-        logger.LogError(ex, "Error occurred while calling n8n webhook.");
-        return Results.Problem("Failed to trigger workflow.", statusCode: 502);
+        // Swallowing exceptions silently without logging (Rule 6 violation)
+        return Results.Problem("An error occurred");
     }
 });
+
+// Non-standard method naming pascalCase / snake_case (Rule 2 violation)
+void process_trigger_data()
+{
+    // Unused helper
+}
 
 app.Run();
